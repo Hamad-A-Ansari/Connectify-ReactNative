@@ -1,5 +1,5 @@
 import { Text, View, TouchableOpacity, Pressable, Image } from "react-native";
-import { styles } from "../../styles/index.styles"
+import { styles } from "../../styles/auth.styles"
 import { Link } from "expo-router";
 
 // Define the Index component
