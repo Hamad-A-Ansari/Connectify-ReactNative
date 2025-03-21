@@ -1,16 +1,20 @@
 import { Text, View, TouchableOpacity, Pressable, Image } from "react-native";
 import { styles } from "../../styles/auth.styles"
 import { Link } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 // Define the Index component
 export default function Index() {
+  const { signOut } = useAuth();
+  
   return (
     <View
       style={styles.container} //This is imported from the styles function created
     >
 
-      <Link href={"/(tabs)/notifications"}>Go to Notifications Page</Link>
-      <Link href={"/(tabs)/profile"}>Go to Profile Page</Link>
+      <TouchableOpacity onPress={()=> signOut()}>
+        <Text style={{color: "white"}}>Signout</Text>
+      </TouchableOpacity>
       
       {/* <Text style={styles.title}>Hello</Text>
       <TouchableOpacity style={styles.button} onPress={() => alert("you touched me :(")}>

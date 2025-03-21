@@ -14,8 +14,8 @@ export const styles = StyleSheet.create({
     marginTop: height * 0.12,
   },
   logoContainer: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: 18,
     backgroundColor: "rgba(74, 222, 128, 0.15)",
     justifyContent: "center",
@@ -43,8 +43,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   illustration: {
-    width: width * 0.75,
-    height: width * 0.75,
+    width: width * 1,
+    height: width * 1,
     maxHeight: 280,
   },
   loginSection: {
