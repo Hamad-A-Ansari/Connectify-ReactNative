@@ -51,17 +51,17 @@ export const createPost = mutation({
 
 
 
-export const getFeedPosts = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if(!identity) throw new Error("Unauthorized");
+// export const getFeedPosts = query({
+//   handler: async (ctx) => {
+//     const identity = await ctx.auth.getUserIdentity();
+//     if(!identity) throw new Error("Unauthorized");
 
-    const currentUser = await ctx.db
-     .query("users")
-     .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-     .first()
+//     const currentUser = await ctx.db
+//      .query("users")
+//      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+//      .first()
      
-    if (!currentUser) throw new Error("User not found");
+//     if (!currentUser) throw new Error("User not found");
 
 
-})
+// })
