@@ -49,7 +49,7 @@ export const getFeedPosts = query({
     const currentUser = await getAuthenticatedUser(ctx);
 
 
-    //get all posts
+    // get posts
     const posts = await ctx.db
      .query("posts")
      .order("desc")
