@@ -20,6 +20,7 @@ export default function TabLayout() {
         elevation: 0,
         height: 60,
         paddingBottom: 8,
+        paddingTop: 20,
       }
     }}
     >

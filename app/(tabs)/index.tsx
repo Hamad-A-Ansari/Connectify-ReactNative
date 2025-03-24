@@ -9,6 +9,7 @@ import Story from "@/components/Story";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader } from "@/components/Loader";
+import Post from "@/components/Post";
 
 
 // Define the Index component
@@ -19,7 +20,7 @@ export default function Index() {
 
   if(posts === undefined) return <Loader />
 
-  if(posts.length === 0) return <NoPostsFound />
+  // if(posts.length === 0) return <NoPostsFound />
 
   return (
     <View style={styles.container} >
@@ -33,25 +34,30 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
+      <ScrollView 
         showsVerticalScrollIndicator={false}
-        horizontal
-        style={styles.storiesContainer}
+        contentContainerStyle={{paddingBottom: 60}}  
       >
-
-
         {/* STORIES Section */}
 
-        {STORIES.map((story) => (
+        <ScrollView
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          style={styles.storiesContainer}
+        >
+          {STORIES.map((story) => (
           <Story key={story.id} story={story}/>
         ))}
+        </ScrollView>
         
 
         {/* Post Section */}
+        
+        {posts.map((post) => (
+          <Post key={post._id} post={post}/>
+        ))}
 
       </ScrollView>
-
-
     </View>
   );
 }
