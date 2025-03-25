@@ -38,24 +38,7 @@ export default function Index() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 60}}  
       >
-        {/* STORIES Section */}
-
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          style={styles.storiesContainer}
-        >
-          {STORIES.map((story) => (
-          <Story key={story.id} story={story}/>
-        ))}
-        </ScrollView>
         
-
-        {/* Post Section */}
-        
-        {posts.map((post) => (
-          <Post key={post._id} post={post}/>
-        ))}
 
       </ScrollView>
     </View>
