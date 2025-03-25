@@ -20,7 +20,7 @@ export default function Index() {
 
   if(posts === undefined) return <Loader />
 
-  // if(posts.length === 0) return <NoPostsFound />
+  if(posts.length === 0) return <NoPostsFound />
 
   return (
     <View style={styles.container} >
