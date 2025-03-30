@@ -59,7 +59,7 @@ function NoBookmarksFound() {
         alignItems: "center",
       }}
     >
-      <Text style={{ color: COLORS.primary, fontSize: 22}}>No bookmarks found.</Text>
+      <Text style={{ color: COLORS.primary, fontSize: 22}}>No Bookmarks found.</Text>
     </View>
   )
 }

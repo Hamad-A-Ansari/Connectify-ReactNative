@@ -1,3 +1,4 @@
+// styles/feed.styles.ts
 import { COLORS } from "@/constants/theme";
 import { Dimensions, Platform, StyleSheet } from "react-native";
 
@@ -18,7 +19,6 @@ export const styles = StyleSheet.create({
     borderBottomColor: COLORS.surface,
   },
   headerTitle: {
-    fontWeight: "700",
     fontSize: 24,
     fontFamily: "JetBrainsMono-Medium",
     color: COLORS.primary,
