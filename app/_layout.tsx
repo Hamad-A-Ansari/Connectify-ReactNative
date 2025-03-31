@@ -32,11 +32,11 @@ export default function RootLayout() {
   return (
     <ClerkAndConvexProvider>
         <SafeAreaProvider>
-          <SafeAreaView style={{ flex: 1, backgroundColor: "#000000"}} onLayout={onLayoutRootView}>
+          <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF"}} onLayout={onLayoutRootView}>
             <InitialLayout/>
           </SafeAreaView>
         </SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" /> 
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" /> 
       </ClerkAndConvexProvider>
       
     
