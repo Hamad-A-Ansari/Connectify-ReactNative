@@ -19,6 +19,7 @@ export default function Profile() {
   const [editedProfile, setEditedProfile] = useState({
     fullname: currentUser?.fullname || "",
     bio: currentUser?.bio || "",
+    username: currentUser?.username || "",
   });
 
   const [selectedPost,setSelectedPost] = useState<Doc<"posts"> | null>(null);
@@ -132,6 +133,19 @@ export default function Profile() {
                   <Ionicons name='close' size={24} color={COLORS.white}/>
                 </TouchableOpacity>
               </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Username</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedProfile.username}
+                  onChangeText={(text) => setEditedProfile((prev) => ({...prev, username: text}))}
+                  placeholderTextColor={COLORS.grey}
+                />
+              </View>
+
+
+
 
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Name</Text>

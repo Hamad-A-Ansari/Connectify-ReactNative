@@ -59,6 +59,7 @@ export const updateProfile = mutation({
   args: {
     fullname: v.string(),
     bio: v.optional(v.string()),
+    username: v.string(),
   },
   handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
@@ -66,6 +67,7 @@ export const updateProfile = mutation({
     await ctx.db.patch(currentUser._id, {
       fullname: args.fullname,
       bio: args.bio,
+      username: args.username,
     });
   },
 });
