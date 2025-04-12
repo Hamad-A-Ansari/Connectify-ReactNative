@@ -1,3 +1,3 @@
-# Mingle - React Native  
+# Connectify - React Native  
 
 ...coming soon 
