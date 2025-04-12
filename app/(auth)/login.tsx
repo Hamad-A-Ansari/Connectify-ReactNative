@@ -36,7 +36,7 @@ export default function Login() {
           <View style={styles.logoContainer}>
             <Ionicons name='leaf' size={32} color={COLORS.primary} />
           </View>
-          <Text style={styles.appName}>Mingle</Text>
+          <Text style={styles.appName}>Connectify</Text>
           <Text style={styles.tagline}>don't miss anything</Text>
       </View>
 

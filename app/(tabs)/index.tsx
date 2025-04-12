@@ -37,7 +37,7 @@ export default function Index() {
 
       {/* Header Section */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mingle</Text>
+        <Text style={styles.headerTitle}>Connectify</Text>
         <TouchableOpacity onPress={()=> signOut()}>
           <Ionicons name="log-out-outline" size={24} color={COLORS.white}/>
         </TouchableOpacity>
