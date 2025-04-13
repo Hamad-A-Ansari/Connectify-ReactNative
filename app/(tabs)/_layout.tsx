@@ -14,12 +14,13 @@ export default function TabLayout() {
       tabBarInactiveTintColor: COLORS.grey,
       tabBarStyle: {
         backgroundColor: 'black',
-        borderTopWidth: 0,
+        borderTopWidth: 0.5,
         position: 'absolute',
         elevation: 0,
-        height: 60,
+        height: 48,
         paddingBottom: 8,
-        paddingTop: 20,
+        paddingTop: 4,
+        borderColor: COLORS.surface,
       }
     }}
     >
