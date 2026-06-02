@@ -4,6 +4,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useToast } from '@/hooks/useToast';
 import { formatErrorForUser } from '@/lib/errorFormatter';
+import { logger } from '@/lib/logger';
 import { COLORS } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -38,6 +39,7 @@ export default function ReportModal({ visible, onClose, targetId, targetType }: 
       showToast('Report submitted. Thank you for helping keep our community safe.', 'success');
       onClose();
     } catch (error) {
+      logger.error("Error submitting report:", error);
       showToast(formatErrorForUser(error), 'error');
     } finally {
       setSubmitting(false);

@@ -11,6 +11,7 @@ import { COLORS } from '@/constants/theme'
 import { Image } from 'expo-image'
 import { useToast } from '@/hooks/useToast'
 import { formatErrorForUser } from '@/lib/errorFormatter'
+import { logger } from '@/lib/logger'
 
 export default function UserProfileScreen() {
 
@@ -35,6 +36,7 @@ export default function UserProfileScreen() {
       await unblockUser({ userId: id as Id<"users"> });
       showToast("User unblocked", "success");
     } catch (error) {
+      logger.error("Error unblocking user:", error);
       showToast(formatErrorForUser(error), "error");
     }
   };

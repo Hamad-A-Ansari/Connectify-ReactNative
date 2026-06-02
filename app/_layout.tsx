@@ -1,6 +1,9 @@
 import InitialLayout from "@/components/InitialLayout";
+import { checkForUpdates } from "@/lib/updates";
 import ClerkAndConvexProvider from "@/provider/ClerkAndConvexProvider";
 import ToastProvider from "@/provider/ToastProvider";
+import * as Sentry from "@sentry/react-native";
+import * as Application from "expo-application";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
 import { SplashScreen } from "expo-router";
@@ -8,10 +11,17 @@ import { useCallback, useEffect } from "react";
 import { Platform, StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  enabled: !__DEV__ && Platform.OS !== "web",
+  tracesSampleRate: 0.2,
+  release: Application.nativeApplicationVersion ?? "1.0.0",
+  dist: Application.nativeBuildVersion ?? "1",
+});
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     "JetBrainsMono-Medium": require("../assets/fonts/JetBrainsMono-Medium.ttf"),
   });
@@ -29,6 +39,11 @@ export default function RootLayout() {
     }
   }, [])
 
+  // Check for OTA updates on app startup
+  useEffect(() => {
+    checkForUpdates();
+  }, []);
+
 
   return (
     <ClerkAndConvexProvider>
@@ -45,3 +60,5 @@ export default function RootLayout() {
     
   );
 }
+
+export default Sentry.wrap(RootLayout);
