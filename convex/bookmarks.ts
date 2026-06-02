@@ -8,6 +8,16 @@ export const toggleBookmark = mutation({
   handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
+    const post = await ctx.db.get(args.postId);
+    if (!post) throw new Error("Post not found");
+
+    // Check if current user is blocked by the post author
+    const block = await ctx.db
+      .query("blocks")
+      .withIndex("by_both", (q) => q.eq("blockerId", post.userId).eq("blockedId", currentUser._id))
+      .first();
+    if (block) throw new Error("You cannot interact with this user's content");
+
     const existing = await ctx.db
       .query("bookmarks")
       .withIndex("by_user_and_post", (q) => q.eq("userId", currentUser._id).eq("postId", args.postId))

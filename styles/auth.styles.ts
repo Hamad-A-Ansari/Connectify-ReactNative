@@ -91,4 +91,8 @@ export const styles = StyleSheet.create({
     color: COLORS.grey,
     maxWidth: 280,
   },
+  legalLink: {
+    color: COLORS.primary,
+    textDecorationLine: "underline",
+  },
 });

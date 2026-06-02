@@ -1,6 +1,7 @@
 import { Id } from "./_generated/dataModel";
 import { mutation, MutationCtx, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { validateField, validateMaxLength, LIMITS } from "./validation";
 
 // Create a new task with the given text
 export const createUser = mutation({
@@ -13,6 +14,10 @@ export const createUser = mutation({
     clerkId: v.string(),
   },
   handler: async (ctx, args) => {
+    validateField(args.username, LIMITS.USERNAME_MAX, "username");
+    if (args.bio !== undefined) {
+      validateMaxLength(args.bio, LIMITS.BIO_MAX, "bio");
+    }
 
     //check user exists
     const existsUser = await ctx.db
@@ -62,6 +67,11 @@ export const updateProfile = mutation({
     username: v.string(),
   },
   handler: async (ctx, args) => {
+    validateField(args.username, LIMITS.USERNAME_MAX, "username");
+    if (args.bio !== undefined) {
+      validateMaxLength(args.bio, LIMITS.BIO_MAX, "bio");
+    }
+
     const currentUser = await getAuthenticatedUser(ctx);
 
     await ctx.db.patch(currentUser._id, {

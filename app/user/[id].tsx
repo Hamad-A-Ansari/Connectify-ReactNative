@@ -9,6 +9,8 @@ import { styles } from '@/styles/profile.styles'
 import { Ionicons } from '@expo/vector-icons'
 import { COLORS } from '@/constants/theme'
 import { Image } from 'expo-image'
+import { useToast } from '@/hooks/useToast'
+import { formatErrorForUser } from '@/lib/errorFormatter'
 
 export default function UserProfileScreen() {
 
@@ -17,15 +19,27 @@ export default function UserProfileScreen() {
   const profile = useQuery(api.users.getUserProfile, {id: id as Id<"users">})
   const posts = useQuery(api.posts.getPostByUser, {userId: id as Id<"users">})
   const isFollowing = useQuery(api.users.isFollowing, {followingId: id as Id<"users">})
+  const isBlockedByMe = useQuery(api.blocks.isBlocked, {userId: id as Id<"users">})
 
   const toggleFollow = useMutation(api.users.toggleFollow);
+  const unblockUser = useMutation(api.blocks.unblockUser);
+  const { showToast } = useToast();
 
   const handleBack = () => {
     if(router.canGoBack()) router.back();
     else router.replace("/(tabs)")
-  } 
+  }
 
-  if(profile === undefined || posts === undefined || isFollowing === undefined) return <Loader/>;
+  const handleUnblock = async () => {
+    try {
+      await unblockUser({ userId: id as Id<"users"> });
+      showToast("User unblocked", "success");
+    } catch (error) {
+      showToast(formatErrorForUser(error), "error");
+    }
+  };
+
+  if(profile === undefined || posts === undefined || isFollowing === undefined || isBlockedByMe === undefined) return <Loader/>;
 
   return (    
     <View style={styles.container}>
@@ -71,15 +85,26 @@ export default function UserProfileScreen() {
           <Text style={styles.name}>{profile.fullname}</Text>
           {profile.bio && <Text style={styles.bio}>{profile.bio}</Text>}
 
-          {/* Follow Button */}
-          <Pressable
-            style={[styles.followButton, isFollowing && styles.followingButton]}
-            onPress={()=> toggleFollow({followingId: id as Id<"users">})}
-          >
-            <Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>
-              {isFollowing ? "Following" : "Follow"}
-            </Text>
-          </Pressable>
+          {/* Follow / Unblock Button */}
+          {isBlockedByMe ? (
+            <Pressable
+              style={[styles.followButton, { backgroundColor: COLORS.primary }]}
+              onPress={handleUnblock}
+            >
+              <Text style={[styles.followButtonText, { color: COLORS.background }]}>
+                Unblock
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={[styles.followButton, isFollowing && styles.followingButton]}
+              onPress={()=> toggleFollow({followingId: id as Id<"users">})}
+            >
+              <Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>
+                {isFollowing ? "Following" : "Follow"}
+              </Text>
+            </Pressable>
+          )}
         </View>
         <View style={styles.postsGrid}>
           {posts.length === 0 ? (

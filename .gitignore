@@ -36,6 +36,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+.kiro/
+.qodo/
+.vscode/
+.idea/
 
 
 

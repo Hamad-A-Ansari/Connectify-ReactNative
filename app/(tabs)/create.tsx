@@ -18,6 +18,8 @@ import { Image } from "expo-image"
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import * as FileSystem  from 'expo-file-system'
+import { logger } from '@/lib/logger'
+import { formatErrorForUser } from '@/lib/errorFormatter'
 
 export default function Create() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function Create() {
   const [caption, setCaption] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
 
   //image-selection
@@ -49,6 +52,7 @@ export default function Create() {
 
     try {
       setIsSharing(true);
+      setError(null);
       const uploadUrl = await generateUploadUrl();
 
       const uploadResult = await FileSystem.uploadAsync(uploadUrl, selectedImage, {
@@ -67,8 +71,9 @@ export default function Create() {
 
       router.push("/(tabs)")
 
-    } catch (error) {
-      console.log("Error sharing post")
+    } catch (err) {
+      logger.error("Error sharing post:", err);
+      setError(formatErrorForUser(err));
     } finally{
       setIsSharing(false);
     }
@@ -180,6 +185,12 @@ export default function Create() {
                   editable={!isSharing}
                 />
               </View>
+
+              {error && (
+                <Text style={{ color: COLORS.primary, fontSize: 14, marginTop: 12 }}>
+                  {error}
+                </Text>
+              )}
 
             </View>
           </View>

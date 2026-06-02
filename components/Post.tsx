@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { styles } from '@/styles/feed.styles'
 import { Link } from 'expo-router'
@@ -10,8 +10,12 @@ import { toggleLike } from '@/convex/posts'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import CommentsModal from './CommentsModal'
+import ReportModal from './ReportModal'
 import { formatDistanceToNow } from 'date-fns'
 import { useUser } from '@clerk/clerk-expo'
+import { logger } from '@/lib/logger'
+import { useToast } from '@/hooks/useToast'
+import { formatErrorForUser } from '@/lib/errorFormatter'
 
 type PostProps = {
   post: {
@@ -37,36 +41,84 @@ export default function Post({post}: PostProps) {
   // const [likesCount, setLikesCount] = useState(post.likes);
   // const [commentsCount, setCommentsCount] = useState(post.comments);
   const [showComments, setShowComments] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
 
   const { user } = useUser();
+  const { showToast } = useToast();
   const currentUser = useQuery(api.users.getUserByClerkId, user ? {clerkId: user.id} : "skip");
 
 
   const toggleLike = useMutation(api.posts.toggleLike);
   const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
   const deletePost = useMutation(api.posts.deletePost);
+  const blockUser = useMutation(api.blocks.blockUser);
 
   const handleLike = async ()=> {
     try {
       const newIsLiked = await toggleLike({postId: post._id});
       setIsLiked(newIsLiked);
     } catch (error) {
-      console.error('Error toggling like: ', error);
+      logger.error('Error toggling like: ', error);
+      showToast(formatErrorForUser(error), 'error');
     }
   };
 
   const handleBookmark = async ()=> {
-    const newIsBookmarked = await toggleBookmark({postId: post._id});
-    setIsBookmarked(newIsBookmarked);
+    try {
+      const newIsBookmarked = await toggleBookmark({postId: post._id});
+      setIsBookmarked(newIsBookmarked);
+    } catch (error) {
+      logger.error('Error toggling bookmark: ', error);
+      showToast(formatErrorForUser(error), 'error');
+    }
   };
 
   const handleDelete = async ()=> {
     try {
       await deletePost({postId: post._id});
     } catch (error) {
-      console.log("Error deleting post:", error)
+      logger.error("Error deleting post:", error);
+      showToast(formatErrorForUser(error), 'error');
     }
+  };
+
+  const handleBlock = async () => {
+    try {
+      await blockUser({ userId: post.author._id as Id<"users"> });
+      showToast('User blocked', 'success');
+    } catch (error) {
+      logger.error('Error blocking user:', error);
+      showToast(formatErrorForUser(error), 'error');
+    }
+  };
+
+  const handleOptionsPress = () => {
+    Alert.alert(
+      '',
+      '',
+      [
+        {
+          text: 'Report',
+          onPress: () => setShowReport(true),
+        },
+        {
+          text: 'Block',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Block User',
+              `Are you sure you want to block ${post.author.username}? You will no longer see their posts.`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Block', style: 'destructive', onPress: handleBlock },
+              ]
+            );
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
   };
 
 
@@ -98,7 +150,7 @@ export default function Post({post}: PostProps) {
             <Ionicons name='trash-outline' size={20} color={COLORS.primary} />
           </TouchableOpacity>
           ) : (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleOptionsPress}>
             <Ionicons name='ellipsis-horizontal' size={20} color={COLORS.white} />
           </TouchableOpacity>
           )}
@@ -159,6 +211,13 @@ export default function Post({post}: PostProps) {
         postId = {post._id}
         visible={showComments}
         onClose={()=> setShowComments(false)}
+      />
+
+      <ReportModal
+        visible={showReport}
+        onClose={() => setShowReport(false)}
+        targetId={post._id}
+        targetType="post"
       />
     </View>
   );
