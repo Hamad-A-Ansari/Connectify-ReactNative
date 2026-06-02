@@ -1,5 +1,6 @@
 import InitialLayout from "@/components/InitialLayout";
 import ClerkAndConvexProvider from "@/provider/ClerkAndConvexProvider";
+import ToastProvider from "@/provider/ToastProvider";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
 import { SplashScreen } from "expo-router";
@@ -32,9 +33,11 @@ export default function RootLayout() {
   return (
     <ClerkAndConvexProvider>
         <SafeAreaProvider>
-          <SafeAreaView style={{ flex: 1, backgroundColor: "#000000"}} onLayout={onLayoutRootView}>
-            <InitialLayout/>
-          </SafeAreaView>
+          <ToastProvider>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#000000"}} onLayout={onLayoutRootView}>
+              <InitialLayout/>
+            </SafeAreaView>
+          </ToastProvider>
         </SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor="#000000" /> 
       </ClerkAndConvexProvider>

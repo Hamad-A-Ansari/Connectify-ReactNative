@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, MutationCtx, query } from "./_generated/server";
 import { getAuthenticatedUser } from "./users";
 import { Id } from "./_generated/dataModel";
+import { validateField, LIMITS } from "./validation";
 
 export const generateUploadUrl = mutation(async (ctx) => {
   const identity = await ctx.auth.getUserIdentity();
@@ -19,6 +20,10 @@ export const createPost = mutation({
 
   handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
+
+    if (args.caption !== undefined) {
+      validateField(args.caption, LIMITS.CAPTION_MAX, "caption");
+    }
 
     const imageUrl = await ctx.storage.getUrl(args.storageId);
     if(!imageUrl) throw new Error("Image not found");
@@ -49,6 +54,12 @@ export const getFeedPosts = query({
   handler: async (ctx) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
+    // Get blocked user IDs for current user
+    const blocks = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", currentUser._id))
+      .collect();
+    const blockedUserIds = new Set(blocks.map((b) => b.blockedId));
 
     // get posts
     const posts = await ctx.db
@@ -58,9 +69,14 @@ export const getFeedPosts = query({
 
     if(posts.length === 0) return [];
 
+    // Filter out posts from blocked users
+    const filteredPosts = posts.filter((post) => !blockedUserIds.has(post.userId));
+
+    if(filteredPosts.length === 0) return [];
+
     //enhance posts with userdata and interaction status
     const postsWithInfo = await Promise.all(
-      posts.map(async (post) => {
+      filteredPosts.map(async (post) => {
         const postAuthor = (await ctx.db.get(post.userId))!;
 
 
@@ -111,6 +127,13 @@ export const toggleLike = mutation({
     
     const post = await ctx.db.get(args.postId);
     if(!post) throw new Error("Post not found");
+
+    // Check if current user is blocked by the post author
+    const block = await ctx.db
+      .query("blocks")
+      .withIndex("by_both", (q) => q.eq("blockerId", post.userId).eq("blockedId", currentUser._id))
+      .first();
+    if (block) throw new Error("You cannot interact with this user's content");
 
     if(existing){
       await ctx.db.delete(existing._id);

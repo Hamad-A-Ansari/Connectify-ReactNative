@@ -5,6 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 import { useSSO } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
+import { logger } from '@/lib/logger';
+import * as WebBrowser from 'expo-web-browser';
+import { TOS_URL, PRIVACY_URL } from '@/constants/legal';
 
 export default function Login() {
   
@@ -25,7 +28,7 @@ export default function Login() {
 
 
     } catch (error) {
-      console.log("OAuth error:", error);
+      logger.error("OAuth error:", error);
     }
   }
   return (
@@ -62,7 +65,16 @@ export default function Login() {
             <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <Text style={styles.termsText}>By continuing, you agree to our Terms and Privacy Policy</Text>
+        <Text style={styles.termsText}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.legalLink} onPress={() => WebBrowser.openBrowserAsync(TOS_URL)}>
+            Terms of Service
+          </Text>
+          {' '}and{' '}
+          <Text style={styles.legalLink} onPress={() => WebBrowser.openBrowserAsync(PRIVACY_URL)}>
+            Privacy Policy
+          </Text>
+        </Text>
       </View>
     </View>
   );

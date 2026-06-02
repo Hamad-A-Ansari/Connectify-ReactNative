@@ -10,11 +10,14 @@ import { styles } from '@/styles/profile.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 import { Image } from 'expo-image';
+import { logger } from '@/lib/logger';
+import { formatErrorForUser } from '@/lib/errorFormatter';
 
 export default function Profile() {
 
   const { signOut, userId } = useAuth();
   const [editModal, setEditModal] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const currentUser = useQuery(api.users.getUserByClerkId, userId ? { clerkId: userId } : "skip");
   const [editedProfile, setEditedProfile] = useState({
     fullname: currentUser?.fullname || "",
@@ -28,8 +31,14 @@ export default function Profile() {
   const updateProfile = useMutation(api.users.updateProfile);
 
   const handleSaveProfile = async () => {
-    await updateProfile(editedProfile);
-    setEditModal(false);
+    try {
+      setProfileError(null);
+      await updateProfile(editedProfile);
+      setEditModal(false);
+    } catch (error) {
+      logger.error("Error updating profile:", error);
+      setProfileError(formatErrorForUser(error));
+    }
   };
 
   if(!currentUser || posts === undefined) return <Loader/>;
@@ -172,6 +181,12 @@ export default function Profile() {
               <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
                 <Text style={styles.saveButtonText}>Save Changes</Text>
               </TouchableOpacity>
+
+              {profileError && (
+                <Text style={{ color: COLORS.primary, fontSize: 14, marginTop: 12, textAlign: 'center' }}>
+                  {profileError}
+                </Text>
+              )}
             </View>
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>

@@ -62,4 +62,27 @@ export default defineSchema({
     .index("by_post", ["postId"])
     .index("by_user_and_post", ["userId", "postId"]),
 
+  reports: defineTable({
+    reporterId: v.id("users"),
+    targetId: v.string(),
+    targetType: v.union(v.literal("post"), v.literal("user")),
+    reason: v.union(
+      v.literal("spam"),
+      v.literal("harassment"),
+      v.literal("nudity"),
+      v.literal("violence"),
+      v.literal("other")
+    ),
+  })
+    .index("by_reporter", ["reporterId"])
+    .index("by_target", ["targetId"]),
+
+  blocks: defineTable({
+    blockerId: v.id("users"),
+    blockedId: v.id("users"),
+  })
+    .index("by_blocker", ["blockerId"])
+    .index("by_blocked", ["blockedId"])
+    .index("by_both", ["blockerId", "blockedId"]),
+
 });

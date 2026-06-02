@@ -8,6 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 import { Loader } from './Loader';
 import Comment from './Comment';
+import { logger } from '@/lib/logger';
+import { useToast } from '@/hooks/useToast';
+import { formatErrorForUser } from '@/lib/errorFormatter';
 
 type CommentsModal = {
   postId: Id<"posts">;
@@ -18,6 +21,7 @@ type CommentsModal = {
 export default function CommentsModal({onClose, postId, visible}: CommentsModal) {
 
   const [newComment, setNewComment] = useState("");
+  const { showToast } = useToast();
   const comments = useQuery(api.comments.getComments, { postId });
   const addComment = useMutation(api.comments.addComment);
 
@@ -32,7 +36,8 @@ export default function CommentsModal({onClose, postId, visible}: CommentsModal)
 
       setNewComment("");
     } catch (error) {
-      console.log("Error adding comment", error);
+      logger.error("Error adding comment", error);
+      showToast(formatErrorForUser(error), 'error');
     }
   }
 
