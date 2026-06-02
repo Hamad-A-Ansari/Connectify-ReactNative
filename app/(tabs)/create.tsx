@@ -20,6 +20,7 @@ import { api } from '@/convex/_generated/api';
 import * as FileSystem  from 'expo-file-system'
 import { logger } from '@/lib/logger'
 import { formatErrorForUser } from '@/lib/errorFormatter'
+import { compressImage } from '@/lib/imageCompression'
 
 export default function Create() {
   const router = useRouter();
@@ -34,14 +35,14 @@ export default function Create() {
 
   //image-selection
   const pickImage = async () => {
-    const result = ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
       aspect: [1,1],
       quality: 0.8,
     });
 
-    if (!(await result).canceled) setSelectedImage((await result).assets[0].uri);
+    if (!result.canceled) setSelectedImage(result.assets[0].uri);
   }
 
   const generateUploadUrl = useMutation(api.posts.generateUploadUrl)
@@ -53,9 +54,13 @@ export default function Create() {
     try {
       setIsSharing(true);
       setError(null);
+
+      // Compress image before upload to reduce storage and improve load times
+      const compressedUri = await compressImage(selectedImage);
+
       const uploadUrl = await generateUploadUrl();
 
-      const uploadResult = await FileSystem.uploadAsync(uploadUrl, selectedImage, {
+      const uploadResult = await FileSystem.uploadAsync(uploadUrl, compressedUri, {
         httpMethod: "POST",
         uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
         mimeType: "image/jpeg",

@@ -5,8 +5,8 @@ import { COLORS } from "@/constants/theme";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "convex/react";
-import { FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { usePaginatedQuery } from "convex/react";
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../../styles/feed.styles";
 import { useState } from "react";
 
@@ -16,20 +16,23 @@ export default function Index() {
   const { signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
-  const posts = useQuery(api.posts.getFeedPosts)
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.posts.getFeedPosts,
+    {},
+    { initialNumItems: 10 }
+  );
 
-  if(posts === undefined) return <Loader />
+  if (status === "LoadingFirstPage") return <Loader />;
 
-  if(posts.length === 0) return <NoPostsFound />
+  if (results.length === 0) return <NoPostsFound />;
 
   //todo: add on refresh query run
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
-      // update posts state here to fetch new data from server
-    }, 2000)
-  }
+    }, 2000);
+  };
 
   return (
     <View style={styles.container} >
@@ -45,12 +48,23 @@ export default function Index() {
 
       
       <FlatList 
-        data={posts}
-        renderItem={({item}) => <Post post={item}/>}
-        keyExtractor={(item) => item._id}
+        data={results.filter(Boolean)}
+        renderItem={({item}) => item ? <Post post={item}/> : null}
+        keyExtractor={(item) => item!._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 60}}
         ListHeaderComponent={<StoriesSection />}
+        ListFooterComponent={
+          status === "LoadingMore" ? (
+            <ActivityIndicator size="small" color={COLORS.primary} style={{ paddingVertical: 16 }} />
+          ) : null
+        }
+        onEndReached={() => {
+          if (status === "CanLoadMore") {
+            loadMore(10);
+          }
+        }}
+        onEndReachedThreshold={0.5}
         refreshControl={
           <RefreshControl 
             refreshing={refreshing}

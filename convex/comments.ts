@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { getAuthenticatedUser } from "./users";
 import { validateField, LIMITS } from "./validation";
 
@@ -52,21 +53,23 @@ export const addComment = mutation({
 
 export const getComments = query({
   args: {
-    postId: v.id("posts")
+    postId: v.id("posts"),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const post = await ctx.db.get(args.postId);
     if (!post) throw new ConvexError("Post not found");
 
-    const comments = await ctx.db.query("comments")
-      .withIndex("by_post", q=>q.eq("postId", args.postId))
-      .collect();
+    const results = await ctx.db.query("comments")
+      .withIndex("by_post", q => q.eq("postId", args.postId))
+      .order("asc")
+      .paginate(args.paginationOpts);
 
     const commentsWithInfo = await Promise.all(
-      comments.map(async (comment) => {
+      results.page.map(async (comment) => {
         const user = (await ctx.db.get(comment.userId))!;
         return {
-         ...comment,
+          ...comment,
           user: {
             fullname: user!.fullname,
             image: user!.image,
@@ -75,6 +78,9 @@ export const getComments = query({
       })
     );
 
-    return commentsWithInfo;
+    return {
+      ...results,
+      page: commentsWithInfo,
+    };
   }
 })

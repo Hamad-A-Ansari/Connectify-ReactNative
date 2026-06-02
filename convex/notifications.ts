@@ -1,45 +1,49 @@
 import { query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { getAuthenticatedUser } from "./users";
 
 
 export const getNotifications = query({
-  handler: async (ctx) => {
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
-
-    const notifications = await ctx.db
+    const results = await ctx.db
       .query("notifications")
       .withIndex("by_receiver", (q) => q.eq("receiverId", currentUser._id))
       .order("desc")
-      .collect();
-    
-    const notificatiionWithInfo = await Promise.all(
-      notifications.map(async (notification) => {
+      .paginate(args.paginationOpts);
+
+    const notificationsWithInfo = await Promise.all(
+      results.page.map(async (notification) => {
         const sender = (await ctx.db.get(notification.senderId))!;
         let post = null;
         let comment = null;
 
-        if(notification.postId){
+        if (notification.postId) {
           post = (await ctx.db.get(notification.postId))!;
         }
 
-        if(notification.type === "comment" && notification.commentId){
+        if (notification.type === "comment" && notification.commentId) {
           comment = (await ctx.db.get(notification.commentId))!;
         }
 
         return {
-         ...notification,
+          ...notification,
           sender: {
             _id: sender._id,
             username: sender.username,
             image: sender.image,
           },
           post,
-          comment:comment?.content,
-        }
+          comment: comment?.content,
+        };
       }),
-    )
+    );
 
-    return notificatiionWithInfo;
-  }
+    return {
+      ...results,
+      page: notificationsWithInfo,
+    };
+  },
 })

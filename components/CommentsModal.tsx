@@ -1,7 +1,8 @@
-import { View, Text, Modal, KeyboardAvoidingView, Platform, TouchableOpacity, FlatList, findNodeHandle, TextInput } from 'react-native'
+import { View, Text, Modal, KeyboardAvoidingView, Platform, TouchableOpacity, FlatList, TextInput, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { Id } from '@/convex/_generated/dataModel'
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation } from 'convex/react';
+import { usePaginatedQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { styles } from '@/styles/feed.styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +23,11 @@ export default function CommentsModal({onClose, postId, visible}: CommentsModal)
 
   const [newComment, setNewComment] = useState("");
   const { showToast } = useToast();
-  const comments = useQuery(api.comments.getComments, { postId });
+  const { results: comments, status, loadMore } = usePaginatedQuery(
+    api.comments.getComments,
+    { postId },
+    { initialNumItems: 20 }
+  );
   const addComment = useMutation(api.comments.addComment);
 
   const handleAddComment = async () => {
@@ -55,7 +60,7 @@ export default function CommentsModal({onClose, postId, visible}: CommentsModal)
           <View style={{width: 24}} />
         </View>
 
-        {comments === undefined ? (
+        {status === "LoadingFirstPage" ? (
           <Loader />
         ) : (
           <FlatList 
@@ -63,6 +68,17 @@ export default function CommentsModal({onClose, postId, visible}: CommentsModal)
             keyExtractor={(item) => item._id}
             renderItem={({item}) => <Comment comment={item} /> }
             contentContainerStyle={styles.commentsList}
+            ListFooterComponent={
+              status === "LoadingMore" ? (
+                <ActivityIndicator size="small" color={COLORS.primary} style={{ paddingVertical: 16 }} />
+              ) : null
+            }
+            onEndReached={() => {
+              if (status === "CanLoadMore") {
+                loadMore(20);
+              }
+            }}
+            onEndReachedThreshold={0.5}
           />
         )}
 

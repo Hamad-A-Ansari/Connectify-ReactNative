@@ -1,23 +1,24 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import React from 'react'
-import { useQuery } from 'convex/react'
+import { usePaginatedQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Loader } from '@/components/Loader';
 import { styles } from '@/styles/notifications.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
-import { Link } from 'expo-router';
-import { Image } from 'expo-image';
-import { formatDistanceToNow } from 'date-fns';
 import Notification from '@/components/Notification';
 
 export default function Notifications() {
 
-  const notifications = useQuery(api.notifications.getNotifications);
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.notifications.getNotifications,
+    {},
+    { initialNumItems: 20 }
+  );
 
-  if(notifications === undefined) return <Loader/>;
+  if (status === "LoadingFirstPage") return <Loader />;
   
-  if(notifications.length === 0) return <NoNotificationsFound/>;
+  if (results.length === 0) return <NoNotificationsFound />;
 
   return (
     <View style={styles.container}>
@@ -26,11 +27,22 @@ export default function Notifications() {
       </View>
 
       <FlatList
-        data={notifications}
+        data={results}
         renderItem={({item}) => <Notification notification={item} />}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
+        ListFooterComponent={
+          status === "LoadingMore" ? (
+            <ActivityIndicator size="small" color={COLORS.primary} style={{ paddingVertical: 16 }} />
+          ) : null
+        }
+        onEndReached={() => {
+          if (status === "CanLoadMore") {
+            loadMore(20);
+          }
+        }}
+        onEndReachedThreshold={0.5}
       />
     </View>
   )

@@ -21,7 +21,7 @@ if (!publishableKey) {
 export default function ClerkAndConvexProvider({children}:{children: React.ReactNode}) {
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth as any}>
         <ClerkLoaded>{children}</ClerkLoaded>
       </ConvexProviderWithClerk>
     </ClerkProvider>

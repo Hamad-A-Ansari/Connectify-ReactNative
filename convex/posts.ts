@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, MutationCtx, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { getAuthenticatedUser } from "./users";
 import { Id } from "./_generated/dataModel";
 import { validateField, LIMITS } from "./validation";
@@ -51,64 +52,55 @@ export const createPost = mutation({
 
 
 export const getFeedPosts = query({
-  handler: async (ctx) => {
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
-    // Get blocked user IDs for current user
-    const blocks = await ctx.db
-      .query("blocks")
-      .withIndex("by_blocker", (q) => q.eq("blockerId", currentUser._id))
-      .collect();
-    const blockedUserIds = new Set(blocks.map((b) => b.blockedId));
+    const results = await ctx.db
+      .query("posts")
+      .order("desc")
+      .paginate(args.paginationOpts);
 
-    // get posts
-    const posts = await ctx.db
-     .query("posts")
-     .order("desc")
-     .collect()
+    // Transform page results with author/like/bookmark info
+    const postsWithInfo = (await Promise.all(
+      results.page.map(async (post) => {
+        const postAuthor = await ctx.db.get(post.userId);
 
-    if(posts.length === 0) return [];
-
-    // Filter out posts from blocked users
-    const filteredPosts = posts.filter((post) => !blockedUserIds.has(post.userId));
-
-    if(filteredPosts.length === 0) return [];
-
-    //enhance posts with userdata and interaction status
-    const postsWithInfo = await Promise.all(
-      filteredPosts.map(async (post) => {
-        const postAuthor = (await ctx.db.get(post.userId))!;
-
+        // Skip posts with deleted/null authors
+        if (!postAuthor) return null;
 
         const like = await ctx.db
           .query("likes")
-          .withIndex("by_user_and_post", (q)=> 
-          q.eq("userId", currentUser._id).eq("postId", post._id))
+          .withIndex("by_user_and_post", (q) =>
+            q.eq("userId", currentUser._id).eq("postId", post._id)
+          )
           .first();
 
         const bookmark = await ctx.db
-         .query("bookmarks")
-         .withIndex("by_user_and_post", (q)=> 
-          q.eq("userId", currentUser._id).eq("postId", post._id))
-         .first();
+          .query("bookmarks")
+          .withIndex("by_user_and_post", (q) =>
+            q.eq("userId", currentUser._id).eq("postId", post._id)
+          )
+          .first();
 
-
-         return {
-         ...post,
+        return {
+          ...post,
           author: {
-            _id: postAuthor?._id,
-            username: postAuthor?.username,
-            image: postAuthor?.image,
+            _id: postAuthor._id,
+            username: postAuthor.username,
+            image: postAuthor.image,
           },
-          isLiked:!!like,
-          isBookmarked:!!bookmark,
-        }
+          isLiked: !!like,
+          isBookmarked: !!bookmark,
+        };
       })
-    )
+    )).filter((p): p is NonNullable<typeof p> => p !== null);
 
-
-    return postsWithInfo;
-  }
+    return {
+      ...results,
+      page: postsWithInfo,
+    };
+  },
 });
 
 
