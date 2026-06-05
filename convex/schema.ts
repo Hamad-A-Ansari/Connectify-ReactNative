@@ -64,18 +64,13 @@ export default defineSchema({
 
   reports: defineTable({
     reporterId: v.id("users"),
-    targetId: v.string(),
-    targetType: v.union(v.literal("post"), v.literal("user")),
-    reason: v.union(
-      v.literal("spam"),
-      v.literal("harassment"),
-      v.literal("nudity"),
-      v.literal("violence"),
-      v.literal("other")
-    ),
+    postId: v.optional(v.id("posts")),
+    targetId: v.optional(v.string()),
+    targetType: v.optional(v.string()),
+    reason: v.string(),
   })
-    .index("by_reporter", ["reporterId"])
-    .index("by_target", ["targetId"]),
+    .index("by_post", ["postId"])
+    .index("by_reporter", ["reporterId"]),
 
   blocks: defineTable({
     blockerId: v.id("users"),
@@ -84,5 +79,13 @@ export default defineSchema({
     .index("by_blocker", ["blockerId"])
     .index("by_blocked", ["blockedId"])
     .index("by_both", ["blockerId", "blockedId"]),
+
+  pushTokens: defineTable({
+    userId: v.id("users"),
+    token: v.string(),
+    platform: v.union(v.literal("ios"), v.literal("android")),
+  })
+    .index("by_user", ["userId"])
+    .index("by_token", ["token"]),
 
 });

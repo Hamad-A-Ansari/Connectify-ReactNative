@@ -1,0 +1,50 @@
+appId: ${APP_ID}
+name: Create Post Flow
+tags:
+  - critical
+  - posts
+---
+
+# Create post flow: select image, add caption, verify post appears in feed
+
+- launchApp
+
+# Navigate to create tab
+- tapOn: "Create"
+
+# Verify create screen header
+- assertVisible: "New Post"
+
+# Tap to select an image
+- tapOn: "Tap to select an image"
+
+# Wait for image picker to open and select first image
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Select the first available image from the gallery
+- tapOn:
+    index: 0
+    optional: true
+
+- waitForAnimationToEnd
+
+# Verify image is selected and caption input is available
+- assertVisible: "New Post"
+
+# Type a caption
+- tapOn: "Write a Caption"
+- inputText: "Maestro test post caption"
+
+# Tap Share button to publish
+- tapOn: "Share"
+
+# Wait for upload and navigation back to feed
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Verify we're back on the home feed
+- assertVisible: "Connectify"
+
+# Verify the post caption appears in the feed
+- assertVisible: "Maestro test post caption"

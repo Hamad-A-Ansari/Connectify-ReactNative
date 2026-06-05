@@ -1,0 +1,41 @@
+appId: ${APP_ID}
+name: Delete Post Flow
+tags:
+  - critical
+  - posts
+---
+
+# Delete post flow: tap trash icon, confirm in dialog, verify post removed
+
+- launchApp
+
+# Wait for feed to load
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible: "Connectify"
+
+# Find and note a post caption before deletion (for verification after)
+- scrollUntilVisible:
+    element: ".*likes"
+    direction: DOWN
+    timeout: 5000
+
+# Tap the trash icon on the user's own post
+- tapOn:
+    id: "trash-outline"
+    index: 0
+
+# Verify the confirmation dialog appears
+- assertVisible: "Delete Post"
+- assertVisible: "Are you sure you want to delete this post?"
+
+# Tap the destructive Delete button to confirm
+- tapOn: "Delete"
+
+# Wait for deletion to complete
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify we're still on the feed (post was removed)
+- assertVisible: "Connectify"

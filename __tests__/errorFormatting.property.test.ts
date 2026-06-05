@@ -1,3 +1,4 @@
+jest.unmock("@/lib/errorFormatter");
 import * as fc from "fast-check";
 import { formatErrorForUser } from "../lib/errorFormatter";
 

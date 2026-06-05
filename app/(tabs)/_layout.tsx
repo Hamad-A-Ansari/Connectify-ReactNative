@@ -34,6 +34,11 @@ export default function TabLayout() {
         tabBarIcon: ({size, color}) => <Ionicons name='bookmarks'  size={size} color={color} />,
 
       }}/>
+      <Tabs.Screen name="search"
+      options={{
+        tabBarIcon: ({size, color}) => <Ionicons name='search'  size={size} color={color} />,
+
+      }}/>
       <Tabs.Screen name="create"
       options={{
         tabBarIcon: ({size, color}) => <Ionicons name='add-circle'  size={size} color={COLORS.primary} />,

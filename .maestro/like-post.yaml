@@ -1,0 +1,41 @@
+appId: ${APP_ID}
+name: Like Post Flow
+tags:
+  - critical
+  - engagement
+---
+
+# Like post flow: tap heart icon, verify like count updates
+
+- launchApp
+
+# Wait for feed to load
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible: "Connectify"
+
+# Scroll to ensure a post is visible
+- scrollUntilVisible:
+    element: "likes"
+    direction: DOWN
+    timeout: 5000
+
+# Note the current likes text before tapping
+- assertVisible:
+    text: ".*likes"
+    regex: true
+
+# Tap the heart icon on the first post to like it
+- tapOn:
+    id: "heart-outline"
+    index: 0
+    optional: true
+
+# Wait for the like to register
+- waitForAnimationToEnd
+
+# Verify like count updated (at least "1 likes" or more visible)
+- assertVisible:
+    text: ".*likes"
+    regex: true

@@ -62,6 +62,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         organization: process.env.SENTRY_ORG ?? "hamad-ansari",
       },
     ],
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/icon.png",
+        color: "#ffffff",
+      },
+    ],
   ],
   updates: {
     url: `https://u.expo.dev/${process.env.EXPO_PUBLIC_EAS_PROJECT_ID}`,

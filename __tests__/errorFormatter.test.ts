@@ -1,3 +1,4 @@
+jest.unmock("@/lib/errorFormatter");
 import { formatErrorForUser } from "../lib/errorFormatter";
 
 describe("formatErrorForUser", () => {
