@@ -7,6 +7,7 @@ import { formatErrorForUser } from '@/lib/errorFormatter';
 import { logger } from '@/lib/logger';
 import { COLORS } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { Id } from '@/convex/_generated/dataModel';
 
 const REPORT_REASONS = [
   { key: 'spam', label: 'Spam' },
@@ -21,11 +22,10 @@ type ReportReason = typeof REPORT_REASONS[number]['key'];
 type ReportModalProps = {
   visible: boolean;
   onClose: () => void;
-  targetId: string;
-  targetType: "post" | "user";
+  postId: Id<"posts">;
 };
 
-export default function ReportModal({ visible, onClose, targetId, targetType }: ReportModalProps) {
+export default function ReportModal({ visible, onClose, postId }: ReportModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
   const createReport = useMutation(api.reports.createReport);
@@ -35,7 +35,7 @@ export default function ReportModal({ visible, onClose, targetId, targetType }: 
 
     setSubmitting(true);
     try {
-      await createReport({ targetId, targetType, reason });
+      await createReport({ postId, reason });
       showToast('Report submitted. Thank you for helping keep our community safe.', 'success');
       onClose();
     } catch (error) {
@@ -57,7 +57,7 @@ export default function ReportModal({ visible, onClose, targetId, targetType }: 
           <View style={{ width: 24 }} />
         </View>
 
-        <Text style={styles.subtitle}>Why are you reporting this {targetType}?</Text>
+        <Text style={styles.subtitle}>Why are you reporting this post?</Text>
 
         <View style={styles.reasonsList}>
           {REPORT_REASONS.map((reason) => (

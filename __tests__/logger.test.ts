@@ -1,3 +1,4 @@
+jest.unmock("@/lib/logger");
 import { LOG_LEVELS, LogLevel } from '../lib/logger';
 
 // We need to test the logger with different __DEV__ values,

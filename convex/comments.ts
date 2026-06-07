@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { getAuthenticatedUser } from "./users";
 import { validateField, LIMITS } from "./validation";
+import { internal } from "./_generated/api";
 
 
 
@@ -45,6 +46,18 @@ export const addComment = mutation({
         postId: args.postId,
         type: "comment",
         commentId,
+      });
+
+      // Schedule push notification
+      const commentPreview = args.content.length > 50
+        ? args.content.substring(0, 50) + "..."
+        : args.content;
+      await ctx.scheduler.runAfter(0, internal.sendPushNotification.sendPushNotification, {
+        receiverId: post.userId,
+        title: "New Comment",
+        body: `${currentUser.username} commented: ${commentPreview}`,
+        data: { postId: args.postId },
+        actorId: currentUser._id,
       });
     }
 

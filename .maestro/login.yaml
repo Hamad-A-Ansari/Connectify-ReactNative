@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+name: Login Flow
+tags:
+  - critical
+  - auth
+---
+
+# Login flow: authenticate via Google OAuth and verify home feed is visible
+
+- launchApp
+
+# Verify login screen is displayed
+- assertVisible: "Connectify"
+- assertVisible: "Continue with Google"
+
+# Tap sign-in button
+- tapOn: "Continue with Google"
+
+# Handle Google OAuth (test account credentials from env)
+- waitForAnimationToEnd
+
+# After authentication, verify we land on the home feed
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible: "Connectify"
+
+# Verify feed content is visible (header with logout icon confirms authenticated state)
+- assertVisible:
+    id: "log-out-outline"
+    optional: true

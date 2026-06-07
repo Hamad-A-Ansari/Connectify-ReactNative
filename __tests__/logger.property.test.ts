@@ -1,3 +1,4 @@
+jest.unmock("@/lib/logger");
 import * as fc from "fast-check";
 import { LOG_LEVELS, LogLevel } from "../lib/logger";
 

@@ -2,6 +2,7 @@ import { Id } from "./_generated/dataModel";
 import { mutation, MutationCtx, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { validateField, validateMaxLength, LIMITS } from "./validation";
+import { internal } from "./_generated/api";
 
 // Create a new task with the given text
 export const createUser = mutation({
@@ -150,6 +151,14 @@ export const toggleFollow = mutation({
         receiverId: args.followingId,
         senderId: currentUser._id,
         type: "follow",
+      });
+
+      // Schedule push notification
+      await ctx.scheduler.runAfter(0, internal.sendPushNotification.sendPushNotification, {
+        receiverId: args.followingId,
+        title: "New Follower",
+        body: `${currentUser.username} started following you`,
+        actorId: currentUser._id,
       });
     }
   },

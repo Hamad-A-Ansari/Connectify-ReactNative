@@ -1,3 +1,4 @@
+jest.unmock("@/hooks/useToast");
 import React from "react";
 import renderer, { act } from "react-test-renderer";
 import ToastProvider from "@/provider/ToastProvider";

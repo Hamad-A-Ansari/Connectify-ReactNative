@@ -1,9 +1,9 @@
 import { v } from "convex/values";
-import { mutation, MutationCtx, query } from "./_generated/server";
+import { action, internalMutation, mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { getAuthenticatedUser } from "./users";
-import { Id } from "./_generated/dataModel";
 import { validateField, LIMITS } from "./validation";
+import { internal } from "./_generated/api";
 
 export const generateUploadUrl = mutation(async (ctx) => {
   const identity = await ctx.auth.getUserIdentity();
@@ -13,12 +13,14 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
 
 
-export const createPost = mutation({
+// Internal mutation to insert a post into the database.
+// Called by the createPost action after moderation passes.
+export const insertPost = internalMutation({
   args: {
-    caption: v.optional(v.string()),
     storageId: v.id("_storage"),
+    imageUrl: v.string(),
+    caption: v.optional(v.string()),
   },
-
   handler: async (ctx, args) => {
     const currentUser = await getAuthenticatedUser(ctx);
 
@@ -26,27 +28,67 @@ export const createPost = mutation({
       validateField(args.caption, LIMITS.CAPTION_MAX, "caption");
     }
 
-    const imageUrl = await ctx.storage.getUrl(args.storageId);
-    if(!imageUrl) throw new Error("Image not found");
-
-
-    //create Post
+    // Create post
     const postId = await ctx.db.insert("posts", {
       userId: currentUser._id,
-      imageUrl,
+      imageUrl: args.imageUrl,
       storageId: args.storageId,
       caption: args.caption,
       likes: 0,
       comments: 0,
-    })
+    });
 
-    //increment users post
-    await  ctx.db.patch(currentUser._id, {
-      posts: currentUser.posts + 1
-    })
+    // Increment user's post count
+    await ctx.db.patch(currentUser._id, {
+      posts: currentUser.posts + 1,
+    });
 
     return postId;
-  }
+  },
+});
+
+export const createPost = action({
+  args: {
+    caption: v.optional(v.string()),
+    storageId: v.id("_storage"),
+  },
+
+  handler: async (ctx, args): Promise<string> => {
+    // Verify user is authenticated
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Validate caption upfront before any async work
+    if (args.caption !== undefined) {
+      validateField(args.caption, LIMITS.CAPTION_MAX, "caption");
+    }
+
+    // Get image URL from storage
+    const imageUrl = await ctx.storage.getUrl(args.storageId);
+    if (!imageUrl) throw new Error("Image not found");
+
+    // Run image moderation
+    const moderationResult = await ctx.runAction(
+      internal.moderation.moderateImage,
+      { imageUrl }
+    );
+
+    // If moderation returns unsafe, reject the post
+    if (!moderationResult.safe) {
+      throw new Error(
+        `Content policy violation: ${moderationResult.reason || "Image violates content policy"}`
+      );
+    }
+
+    // Moderation passed (safe or graceful failure) — insert the post
+    const postId: string = await ctx.runMutation(internal.posts.insertPost, {
+      storageId: args.storageId,
+      imageUrl,
+      caption: args.caption,
+    });
+
+    return postId;
+  },
 });
 
 
@@ -145,6 +187,15 @@ export const toggleLike = mutation({
           senderId: currentUser._id,
           postId: args.postId,
           type: "like",
+        });
+
+        // Schedule push notification
+        await ctx.scheduler.runAfter(0, internal.sendPushNotification.sendPushNotification, {
+          receiverId: post.userId,
+          title: "New Like",
+          body: `${currentUser.username} liked your post`,
+          data: { postId: args.postId },
+          actorId: currentUser._id,
         });
       }
 

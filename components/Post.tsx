@@ -74,9 +74,20 @@ export default function Post({post}: PostProps) {
     }
   };
 
-  const handleDelete = async ()=> {
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: confirmDelete },
+      ]
+    );
+  };
+
+  const confirmDelete = async () => {
     try {
-      await deletePost({postId: post._id});
+      await deletePost({ postId: post._id });
     } catch (error) {
       logger.error("Error deleting post:", error);
       showToast(formatErrorForUser(error), 'error');
@@ -216,8 +227,7 @@ export default function Post({post}: PostProps) {
       <ReportModal
         visible={showReport}
         onClose={() => setShowReport(false)}
-        targetId={post._id}
-        targetType="post"
+        postId={post._id}
       />
     </View>
   );

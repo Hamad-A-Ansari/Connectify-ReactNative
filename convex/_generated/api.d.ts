@@ -12,9 +12,13 @@ import type * as blocks from "../blocks.js";
 import type * as bookmarks from "../bookmarks.js";
 import type * as comments from "../comments.js";
 import type * as http from "../http.js";
+import type * as moderation from "../moderation.js";
 import type * as notifications from "../notifications.js";
 import type * as posts from "../posts.js";
+import type * as pushTokens from "../pushTokens.js";
 import type * as reports from "../reports.js";
+import type * as search from "../search.js";
+import type * as sendPushNotification from "../sendPushNotification.js";
 import type * as users from "../users.js";
 import type * as validation from "../validation.js";
 
@@ -29,9 +33,13 @@ declare const fullApi: ApiFromModules<{
   bookmarks: typeof bookmarks;
   comments: typeof comments;
   http: typeof http;
+  moderation: typeof moderation;
   notifications: typeof notifications;
   posts: typeof posts;
+  pushTokens: typeof pushTokens;
   reports: typeof reports;
+  search: typeof search;
+  sendPushNotification: typeof sendPushNotification;
   users: typeof users;
   validation: typeof validation;
 }>;

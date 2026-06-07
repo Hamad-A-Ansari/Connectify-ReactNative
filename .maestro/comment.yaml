@@ -1,0 +1,47 @@
+appId: ${APP_ID}
+name: Comment Flow
+tags:
+  - critical
+  - engagement
+---
+
+# Comment flow: open comments modal, type comment, submit, verify it appears
+
+- launchApp
+
+# Wait for feed to load
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible: "Connectify"
+
+# Tap the comment (chat bubble) icon on the first post
+- tapOn:
+    id: "chatbubble-outline"
+    index: 0
+
+# Wait for comments modal to open
+- waitForAnimationToEnd
+
+# Verify the comments modal is visible
+- assertVisible: "Comments"
+
+# Tap the comment input field
+- tapOn: "Add a comment..."
+
+# Type a test comment
+- inputText: "Maestro test comment"
+
+# Tap Post button to submit the comment
+- tapOn: "Post"
+
+# Wait for comment to be saved and appear
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify the comment appears in the list
+- assertVisible: "Maestro test comment"
+
+# Close the comments modal
+- tapOn:
+    id: "close"

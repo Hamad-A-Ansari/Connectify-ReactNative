@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 import * as ImagePicker from "expo-image-picker"
 import { Image } from "expo-image"
-import { useMutation } from 'convex/react';
+import { useMutation, useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import * as FileSystem  from 'expo-file-system'
 import { logger } from '@/lib/logger'
@@ -46,7 +46,7 @@ export default function Create() {
   }
 
   const generateUploadUrl = useMutation(api.posts.generateUploadUrl)
-  const createPost = useMutation(api.posts.createPost)
+  const createPost = useAction(api.posts.createPost)
 
   const handleShare = async () => {
     if(!selectedImage) return;
