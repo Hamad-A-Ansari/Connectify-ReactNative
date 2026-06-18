@@ -40,8 +40,16 @@ app-example
 .qodo/
 .vscode/
 .idea/
+./ios
+
+# Android build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
 
 
 
 # personal-learning
 Notes.md
+android/app/debug.keystore

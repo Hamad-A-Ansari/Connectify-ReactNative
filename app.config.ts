@@ -4,25 +4,25 @@ const IS_DEV = process.env.APP_VARIANT === "development";
 const IS_PREVIEW = process.env.APP_VARIANT === "preview";
 
 const getAppName = () => {
-  if (IS_DEV) return "ReactNative-Project (Dev)";
-  if (IS_PREVIEW) return "ReactNative-Project (Preview)";
-  return "ReactNative-Project";
+  if (IS_DEV) return "Connectify (Dev)";
+  if (IS_PREVIEW) return "Connectify (Preview)";
+  return "Connectify";
 };
 
 const getBundleId = () => {
-  if (IS_DEV) return "com.anonymous.ReactNativeProject.dev";
-  if (IS_PREVIEW) return "com.anonymous.ReactNativeProject.preview";
-  return "com.anonymous.ReactNativeProject";
+  if (IS_DEV) return "com.hamadansari.connectify.dev";
+  if (IS_PREVIEW) return "com.hamadansari.connectify.preview";
+  return "com.hamadansari.connectify";
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: getAppName(),
-  slug: "ReactNative-Project",
+  slug: "connectify",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "myapp",
+  scheme: "connectify",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   ios: {
@@ -71,14 +71,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
   ],
   updates: {
-    url: `https://u.expo.dev/${process.env.EXPO_PUBLIC_EAS_PROJECT_ID}`,
+    url: "https://u.expo.dev/1bec40f5-78b1-4b83-9198-9fd8cf6dfc68",
   },
-  runtimeVersion: {
-    policy: "appVersion",
-  },
+  runtimeVersion: "1.0.0",
   extra: {
     eas: {
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
+      projectId: "1bec40f5-78b1-4b83-9198-9fd8cf6dfc68",
     },
   },
   experiments: {
