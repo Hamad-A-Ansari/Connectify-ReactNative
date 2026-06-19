@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, FlatList, Modal, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, FlatList, Modal, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, TextInput, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import { Link } from 'expo-router'
 import { useAuth } from '@clerk/clerk-expo'
@@ -12,6 +12,8 @@ import { COLORS } from '@/constants/theme';
 import { Image } from 'expo-image';
 import { logger } from '@/lib/logger';
 import { formatErrorForUser } from '@/lib/errorFormatter';
+import * as WebBrowser from 'expo-web-browser';
+import { TOS_URL, PRIVACY_URL, CHILD_SAFETY_URL } from '@/constants/legal';
 
 export default function Profile() {
 
@@ -26,6 +28,7 @@ export default function Profile() {
   });
 
   const [selectedPost,setSelectedPost] = useState<Doc<"posts"> | null>(null);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const posts = useQuery(api.posts.getPostByUser, {});
 
   const updateProfile = useMutation(api.users.updateProfile);
@@ -54,8 +57,8 @@ export default function Profile() {
           <Text style={styles.username}>{currentUser.username}</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon} onPress={()=> signOut()}>
-            <Ionicons name='log-out-outline' size={24} color={COLORS.white}/>
+          <TouchableOpacity style={styles.headerIcon} onPress={() => setSettingsVisible(true)}>
+            <Ionicons name='menu-outline' size={24} color={COLORS.white}/>
           </TouchableOpacity>
         </View>
       </View>
@@ -218,9 +221,108 @@ export default function Profile() {
         </View>
       </Modal>
 
+      {/* Settings Menu */}
+      <Modal
+        visible={settingsVisible}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() => setSettingsVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSettingsVisible(false)}>
+          <View style={settingsStyles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={settingsStyles.menu}>
+                <View style={settingsStyles.menuHeader}>
+                  <Text style={settingsStyles.menuTitle}>Settings</Text>
+                  <TouchableOpacity onPress={() => setSettingsVisible(false)}>
+                    <Ionicons name='close' size={24} color={COLORS.white}/>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  style={settingsStyles.menuItem}
+                  onPress={() => { setSettingsVisible(false); WebBrowser.openBrowserAsync(PRIVACY_URL); }}
+                >
+                  <Ionicons name='shield-checkmark-outline' size={22} color={COLORS.white}/>
+                  <Text style={settingsStyles.menuItemText}>Privacy Policy</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={settingsStyles.menuItem}
+                  onPress={() => { setSettingsVisible(false); WebBrowser.openBrowserAsync(TOS_URL); }}
+                >
+                  <Ionicons name='document-text-outline' size={22} color={COLORS.white}/>
+                  <Text style={settingsStyles.menuItemText}>Terms of Service</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={settingsStyles.menuItem}
+                  onPress={() => { setSettingsVisible(false); WebBrowser.openBrowserAsync(CHILD_SAFETY_URL); }}
+                >
+                  <Ionicons name='hand-left-outline' size={22} color={COLORS.white}/>
+                  <Text style={settingsStyles.menuItemText}>Child Safety Standards</Text>
+                </TouchableOpacity>
+
+                <View style={settingsStyles.divider}/>
+
+                <TouchableOpacity
+                  style={settingsStyles.menuItem}
+                  onPress={() => { setSettingsVisible(false); signOut(); }}
+                >
+                  <Ionicons name='log-out-outline' size={22} color={COLORS.primary}/>
+                  <Text style={[settingsStyles.menuItemText, { color: COLORS.primary }]}>Log Out</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
     </View>
   )
 }
+
+const settingsStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  menu: {
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: 16,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  menuTitle: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    gap: 14,
+  },
+  menuItemText: {
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  divider: {
+    height: 0.5,
+    backgroundColor: COLORS.surface,
+    marginVertical: 8,
+  },
+});
 
 function NoPostsFound() {
   return (

@@ -18,6 +18,7 @@ import type * as posts from "../posts.js";
 import type * as pushTokens from "../pushTokens.js";
 import type * as reports from "../reports.js";
 import type * as search from "../search.js";
+import type * as sendChildSafetyAlert from "../sendChildSafetyAlert.js";
 import type * as sendPushNotification from "../sendPushNotification.js";
 import type * as users from "../users.js";
 import type * as validation from "../validation.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   pushTokens: typeof pushTokens;
   reports: typeof reports;
   search: typeof search;
+  sendChildSafetyAlert: typeof sendChildSafetyAlert;
   sendPushNotification: typeof sendPushNotification;
   users: typeof users;
   validation: typeof validation;

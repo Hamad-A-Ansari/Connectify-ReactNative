@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Id } from '@/convex/_generated/dataModel';
 
 const REPORT_REASONS = [
+  { key: 'child_safety', label: 'Child Safety / CSAE' },
   { key: 'spam', label: 'Spam' },
   { key: 'harassment', label: 'Harassment' },
   { key: 'nudity', label: 'Nudity' },

@@ -1,2 +1,3 @@
-export const TOS_URL = process.env.EXPO_PUBLIC_TOS_URL || 'https://example.com/terms-of-service';
-export const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL || 'https://example.com/privacy-policy';
+export const TOS_URL = 'https://connectify-web.vercel.app/terms-of-service';
+export const PRIVACY_URL = 'https://connectify-web.vercel.app/privacy-policy';
+export const CHILD_SAFETY_URL = 'https://connectify-web.vercel.app/child-safety';
