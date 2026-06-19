@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'ReactNative-Project'
+rootProject.name = 'Connectify'
 
 dependencyResolutionManagement {
   versionCatalogs {
